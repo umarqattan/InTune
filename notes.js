@@ -1,53 +1,29 @@
-// Copyright (c) 2019 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
 
-/* ===
-ml5 Example
-Basic Pitch Detection
-=== */
+/*
+    Distance between notes
 
-let audioContext;
-let mic;
-let pitch;
-let notes;
-var initializedNotes = false;
+    2^(1/12) = 1.059
 
-function setup() {
-    console.log("Setting up...");
-    noCanvas();
-    audioContext = getAudioContext();
-    mic = new p5.AudioIn();
-    mic.start(startPitch);
-}
+    440 Hz / (2^(n/12)) where n is the number of notes to skip 
+    if n < 0 then the frequency will be the next semitone
+    if n > 0 then the frequency will be the previous semitone
+    if n == 0 then the frequency is A4
 
-function startPitch() {
-  pitch = ml5.pitchDetection('./model/', audioContext , mic.stream, modelLoaded);
-}
+    * The next semitone from A4 is A#4 or B♭4
+    * The next semitone from A#4 or B♭4 is B4
+    * The next semitone from B4 is B#4 or C5
+    * Going from B to C increments the octave
+    * B# is an alias of C
+    * E# is an alias of F
+    * Create a table starting from A0 all the way to A9
+    * There are 7 major tones per octave and 5 semitones within an octave.
+    * There are 9 octaves between A0 and A9 whose frequencies range between 440/(2^(48/12)) and 440/(2^(-60/12))
+    *     spanning 108 semitones.
+    * For each semitone from A0 to A9, set the frequency range for A0 from 440/(2^(48/12)) = 27.500 Hz up until the next semitone
+    *     440/(2^((48-i)/12)) == 29.135 Hz where i ranges from 0 to 108
+*/
 
-function modelLoaded() {
-  select('#status').html('Model Loaded');
-  getPitch();
-}
-
-function getPitch() {
-  if (!initializedNotes) { 
-    notes = new Notes();
-    initializedNotes = true;
-  }
-  pitch.getPitch(function(err, frequency) {
-    if (frequency) {
-      select('#result').html(frequency);
-      select('#note').html(notes.getNoteDescription(frequency));
-    } else {
-      select('#result').html('No pitch detected');
-    }
-    getPitch();
-  })
-}
-
-class Notes {
+export default class Notes {
 
     constructor() {
   
@@ -106,3 +82,5 @@ class Notes {
     }`
   }
 }
+
+
