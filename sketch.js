@@ -24,7 +24,6 @@ let pitch;
 let notes;
 var noteExists = false;
 var lastNote = null;
-var allBachNotes = new Map();
 var currentFrequency;
 var sameNoteCount = 0;
 var currentBachNoteIndex = 0;
@@ -35,11 +34,11 @@ function pitchDetection() {
     const renderer = new Renderer(div, Renderer.Backends.SVG);
 
     // Configure the rendering context.
-    renderer.resize(250, 250);
+    renderer.resize(500, 300);
     context = renderer.getContext();
 
     // Create a stave of width 300 at position 5, 5 on the canvas.
-    stave = new Stave(5, 5, 200);
+    stave = new Stave(10, 10, 200);
 
     // Add a clef and time signature.
     stave.addClef('treble');
@@ -85,10 +84,6 @@ function bachPartita() {
     beams.forEach((b) => { 
         b.setContext(context3).draw();
     });
-
-    for (var i = 0; i < allNotes.length; i++) { 
-        allBachNotes[i] = (allNotes[i].keys[0]);
-    }
 };
  
 function sightReading() { 
@@ -172,19 +167,20 @@ function sightReading() {
   
 
 function setup() {
-
-    // TODO: fix weird y-axis issue with the Pitch Detection div
-    console.log("Setting up...");
     noCanvas();
-    notes = new Notes();
-    
 
-    audioContext = getAudioContext();
-    mic = new p5.AudioIn();
-    mic.start(startPitch);
+    notes = new Notes();
     pitchDetection();
     sightReading();
     bachPartita();
+
+    // TODO: fix weird y-axis issue with the Pitch Detection div
+    console.log("Setting up...");
+    
+    audioContext = getAudioContext();
+    mic = new p5.AudioIn();
+    mic.start(startPitch);
+
 }
 
 function startPitch() {
@@ -252,7 +248,8 @@ function getPitch() {
         lastNote = currentNote;
 
         if (currentBachNoteIndex < allNotes.length && currentNote.toLowerCase() === allNotes[currentBachNoteIndex].keys[0] && allNotes[currentBachNoteIndex].noteType == 'n' && notes.getCentsFromFrequency(frequency) <= 30) {
-            if (sameNoteCount < currentNote.duration * 100) {
+            
+            if (sameNoteCount < allNotes[currentBachNoteIndex].duration * 2) {
                 sameNoteCount += 1;
             } else { 
                 sameNoteCount = 0;
